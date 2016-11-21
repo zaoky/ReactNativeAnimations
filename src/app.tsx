@@ -317,10 +317,10 @@ export class ParallelAnimation extends React.Component<void, void>{
 
 export default class FlipCardAnimation extends React.Component<void, void>{
     animatedValue: Animated.Value;
-    frontInterpolate: any;
-    backInterpolate: any;
+    frontInterpolate: Animated.AnimatedInterpolation;
+    backInterpolate: Animated.AnimatedInterpolation;
     value: number;
-
+    backOpacity: Animated.AnimatedInterpolation;
     componentWillMount() {
         this.animatedValue = new Animated.Value(180);
         this.value = 180;
@@ -335,6 +335,10 @@ export default class FlipCardAnimation extends React.Component<void, void>{
         this.backInterpolate = this.animatedValue.interpolate({
             inputRange: [0, 180],
             outputRange: ['180deg', '360deg']
+        });
+        this.backOpacity = this.animatedValue.interpolate({
+            inputRange: [89, 90],
+            outputRange: [0,1]
         });
     }
 
@@ -378,7 +382,9 @@ export default class FlipCardAnimation extends React.Component<void, void>{
         const backAnimatedStyle = {
             transform: [
                 { rotateX: this.backInterpolate }
-            ]
+            ],
+            opacity: this.backOpacity
+            
         };
         
         //flip horizontal
