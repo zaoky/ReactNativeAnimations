@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'blue',
-        backfaceVisibility: 'hidden'
+        backfaceVisibility: 'hidden' //not working on android
     },
     flipCardBack: {
         backgroundColor: 'red',
