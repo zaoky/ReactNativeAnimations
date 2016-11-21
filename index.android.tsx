@@ -1,4 +1,4 @@
 import {  AppRegistry} from 'react-native';
-import StaggerAnimation from './src/app'
+import FlipCardAnimation from './src/app'
 
-AppRegistry.registerComponent('ReactNativeAnimations', () => StaggerAnimation);
+AppRegistry.registerComponent('ReactNativeAnimations', () => FlipCardAnimation);

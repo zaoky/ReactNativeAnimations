@@ -1,6 +1,6 @@
 
 import * as React from 'react';
-import { StyleSheet, View, Animated, Easing, Text, TouchableWithoutFeedback, PanResponder, Dimensions } from 'react-native';
+import { StyleSheet, View, Animated, Easing, Text, TouchableWithoutFeedback, PanResponder, Dimensions, TouchableOpacity } from 'react-native';
 const {height} = Dimensions.get("window");
 
 export class ReactNativeAnimations extends React.Component<void, void> {
@@ -232,7 +232,7 @@ export class SequenceAnimation extends React.Component<void, void>{
     }
 }
 
-export  class StaggerAnimation extends React.Component<void, void>{
+export class StaggerAnimation extends React.Component<void, void>{
     animatedValue1: Animated.Value;
     animatedValue2: Animated.Value;
     animatedValue3: Animated.Value;
@@ -243,20 +243,20 @@ export  class StaggerAnimation extends React.Component<void, void>{
     }
 
     componentDidMount() {
-      Animated.stagger(300,[
-          Animated.timing(this.animatedValue1, {
-              toValue: height,
-              duration: 1500
-          }),
-          Animated.timing(this.animatedValue2, {
-              toValue: height,
-              duration: 1500
-          }),
-          Animated.timing(this.animatedValue3, {
-              toValue: height,
-              duration: 1500
-          })
-      ]).start();
+        Animated.stagger(300, [
+            Animated.timing(this.animatedValue1, {
+                toValue: height,
+                duration: 1500
+            }),
+            Animated.timing(this.animatedValue2, {
+                toValue: height,
+                duration: 1500
+            }),
+            Animated.timing(this.animatedValue3, {
+                toValue: height,
+                duration: 1500
+            })
+        ]).start();
     }
 
     render() {
@@ -279,7 +279,141 @@ export  class StaggerAnimation extends React.Component<void, void>{
     }
 }
 
+export class ParallelAnimation extends React.Component<void, void>{
+    animatedValue1: Animated.Value;
+    animatedValue2: Animated.Value;
+    componentWillMount() {
+        this.animatedValue1 = new Animated.Value(0);
+        this.animatedValue2 = new Animated.Value(1);
+    }
 
+    componentDidMount() {
+        Animated.parallel([
+            Animated.timing(this.animatedValue1, {
+                toValue: 200,
+                duration: 500
+            }),
+            Animated.spring(this.animatedValue2, {
+                toValue: 2
+            })
+        ]).start();
+    }
+
+    render() {
+        const animatedStyles = {
+            transform: [
+                { translateY: this.animatedValue1 },
+                { scale: this.animatedValue2 }
+            ]
+        };
+
+        return (
+            <View style={[styles.container]} >
+                <Animated.View style={[styles.box, animatedStyles]} />
+            </View>
+        );
+    }
+}
+
+export default class FlipCardAnimation extends React.Component<void, void>{
+    animatedValue: Animated.Value;
+    frontInterpolate: any;
+    backInterpolate: any;
+    value: number;
+
+    componentWillMount() {
+        this.animatedValue = new Animated.Value(180);
+        this.value = 180;
+        this.animatedValue.addListener(({value}) => {
+            this.value = value;
+        });
+
+        this.frontInterpolate = this.animatedValue.interpolate({
+            inputRange: [0, 180],
+            outputRange: ['0deg', '180deg']
+        });
+        this.backInterpolate = this.animatedValue.interpolate({
+            inputRange: [0, 180],
+            outputRange: ['180deg', '360deg']
+        });
+    }
+
+    onFlipCard() {
+        // if (this.value >= 90) {
+        //     Animated.timing(this.animatedValue, {
+        //         toValue: 0,
+        //         duration: 800
+        //     }).start();
+        // }
+        // else {
+        //     Animated.timing(this.animatedValue, {
+        //         toValue: 180,
+        //         duration: 800
+        //     }).start();
+        // }
+        // more realistic
+        if (this.value >= 90) {
+            Animated.spring(this.animatedValue, {
+                toValue: 0,
+                friction: 8,
+                tension: 10
+            }).start();
+        }
+        else {
+            Animated.spring(this.animatedValue, {
+                toValue: 180,
+                friction: 8,
+                tension: 10
+            }).start();
+        }
+    }
+
+    render() {
+        //flip vertical
+        const frontAnimatedStyle = {
+            transform: [
+                { rotateX: this.frontInterpolate }
+            ]
+        };
+        const backAnimatedStyle = {
+            transform: [
+                { rotateX: this.backInterpolate }
+            ]
+        };
+        
+        //flip horizontal
+        //   const frontAnimatedStyle = {
+        //     transform: [
+        //         { rotateY: this.frontInterpolate }
+        //     ]
+        // };
+        // const backAnimatedStyle = {
+        //     transform: [
+        //         { rotateY: this.backInterpolate }
+        //     ]
+        // };
+
+        return (
+            <View style={[styles.container]} >
+                <View>
+                    <Animated.View style={[styles.flipCard, frontAnimatedStyle]} >
+                        <Text style={[styles.flipText]} >
+                            This text is flipping on the front.
+                        </Text>
+                    </Animated.View>
+                    <Animated.View style={[backAnimatedStyle, styles.flipCard, styles.flipCardBack]} >
+                        <Text style={[styles.flipText]} >
+                            This text is flipping on the back
+                        </Text>
+                    </Animated.View>
+                </View>
+                <TouchableOpacity onPress={() => this.onFlipCard()} >
+                    <Text> Flip! </Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
+}
 
 const styles = StyleSheet.create({
     container: {
@@ -288,17 +422,17 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     containerStagger: {
-         flex: 1,
+        flex: 1,
         flexDirection: 'row'
     },
     box: {
         backgroundColor: '#333',
         width: 100,
-        height: 100      
+        height: 100
     },
     boxStagger: {
-          flex: 1,
-        backgroundColor: '#333', 
+        flex: 1,
+        backgroundColor: '#333',
         marginHorizontal: 5
     },
     button: {
@@ -310,5 +444,24 @@ const styles = StyleSheet.create({
     },
     text: {
         color: '#fff'
-    }
+    },
+    flipCard: {
+        width: 200,
+        height: 200,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'blue',
+        backfaceVisibility: 'hidden'
+    },
+    flipCardBack: {
+        backgroundColor: 'red',
+        position: 'absolute',
+        top: 0
+    },
+     flipText: {
+    width: 90,
+    fontSize: 20,
+    color: 'white',
+    fontWeight: 'bold',
+  }
 });
